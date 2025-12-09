@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>长方形面积-长宽关系交互式模型</title>
+    <!-- Ant Design CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/antd@5.12.8/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/antd@5.12.8/dist/antd.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 24px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 32px;
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .back-button {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            height: 36px;
+            padding: 0 16px;
+            background: #1890ff;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .back-button:hover {
+            background: #40a9ff;
+            transform: translateX(-2px);
+        }
+
+        h1 {
+            color: #1890ff;
+            text-align: center;
+            margin: 16px 0 32px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .slider-group {
+            margin-bottom: 32px;
+            background: #fafafa;
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid #f0f0f0;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #262626;
+        }
+
+        .value-display {
+            font-size: 20px;
+            color: #1890ff;
+            font-weight: 600;
+            background: #e6f7ff;
+            padding: 4px 12px;
+            border-radius: 6px;
+        }
+
+        .slider {
+            width: 100%;
+            height: 10px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #f0f0f0;
+            border-radius: 5px;
+            outline: none;
+            transition: background 0.3s;
+        }
+
+        .slider:hover {
+            background: #d9d9d9;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #1890ff;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            background: #40a9ff;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
+        }
+
+        .rectangle-display {
+            margin: 32px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .rectangle-container {
+            width: 600px;
+            height: 400px;
+            position: relative;
+            border: 3px dashed #d9d9d9;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #fafafa 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .rectangle {
+            width: 300px;
+            height: 150px;
+            background: linear-gradient(135deg, rgba(24, 144, 255, 0.15) 0%, rgba(24, 144, 255, 0.25) 100%);
+            border: 3px solid #1890ff;
+            border-radius: 8px;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+        }
+
+        .rectangle span {
+            font-size: 18px;
+            color: #1890ff;
+            font-weight: 600;
+        }
+
+        .dimension-labels {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 450px;
+            margin-top: 12px;
+        }
+
+        .dimension-label {
+            font-size: 16px;
+            color: #595959;
+            font-weight: 500;
+            background: #fafafa;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid #f0f0f0;
+        }
+
+        .dimension-label span {
+            color: #1890ff;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .formula-section {
+            margin-top: 32px;
+            padding: 24px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
+            border-radius: 12px;
+            border: 1px solid #bae7ff;
+        }
+
+        .formula-title {
+            font-size: 20px;
+            color: #1890ff;
+            margin-bottom: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .formula-title::before {
+            content: '📚';
+            font-size: 24px;
+        }
+
+        .formula-item {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #262626;
+            line-height: 1.8;
+            padding: 8px 0;
+        }
+
+        .formula-highlight {
+            color: #ff4d4f;
+            font-weight: 600;
+            font-size: 18px;
+            background: #fff1f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+                margin-top: 50px;
+            }
+
+            .rectangle-container {
+                width: 100%;
+                max-width: 1000px;
+                height: 800px;
+            }
+
+            .slider-group {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-button" onclick="goHome()">
+            <span>←</span> 返回主菜单
+        </button>
+        <h1>📐 长方形面积-长宽关系交互式模型</h1>
+
+        <!-- 面积滑块 -->
+        <div class="slider-group">
+            <div class="slider-label">
+                <span>📏 长方形面积 S (平方厘米)</span>
+                <span class="value-display" id="area-value">150</span>
+            </div>
+            <input type="range" min="50" max="500" value="150" step="5" class="slider" id="area-slider">
+        </div>
+
+        <!-- 长滑块 -->
+        <div class="slider-group">
+            <div class="slider-label">
+                <span>📐 长方形长 a (厘米)</span>
+                <span class="value-display" id="length-value">15</span>
+            </div>
+            <input type="range" min="5" max="50" value="15" step="1" class="slider" id="length-slider">
+        </div>
+
+        <!-- 长方形可视化展示 -->
+        <div class="rectangle-display">
+            <div class="rectangle-container">
+                <div class="rectangle" id="rectangle">
+                    <span>长方形</span>
+                </div>
+            </div>
+            <div class="dimension-labels">
+                <div class="dimension-label">长: <span id="display-length">15</span> cm</div>
+                <div class="dimension-label">宽: <span id="display-width">10</span> cm</div>
+            </div>
+        </div>
+
+        <!-- 公式展示区域 -->
+        <div class="formula-section">
+            <div class="formula-title">公式推导与计算</div>
+            <div class="formula-item">1️⃣ 长方形面积公式：S = a × b （b为宽）</div>
+            <div class="formula-item">2️⃣ 推导宽的计算公式：b = <span class="formula-highlight">S ÷ a</span></div>
+            <div class="formula-item" id="numeric-calculation">3️⃣ 数值计算：b = 150 ÷ 15 = <span class="formula-highlight">10</span> 厘米</div>
+            <div class="formula-item">4️⃣ 字母表达式：b = <span class="formula-highlight">S/a</span></div>
+        </div>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const areaSlider = document.getElementById('area-slider');
+        const lengthSlider = document.getElementById('length-slider');
+        const areaValue = document.getElementById('area-value');
+        const lengthValue = document.getElementById('length-value');
+        const displayLength = document.getElementById('display-length');
+        const displayWidth = document.getElementById('display-width');
+        const rectangle = document.getElementById('rectangle');
+        const numericCalculation = document.getElementById('numeric-calculation');
+
+        // 初始化参数
+        let area = parseInt(areaSlider.value);
+        let length = parseInt(lengthSlider.value);
+        let width = area / length;
+
+        // 更新显示函数
+        function updateDisplay() {
+            // 更新数值显示
+            areaValue.textContent = area;
+            lengthValue.textContent = length;
+            displayLength.textContent = length;
+            displayWidth.textContent = width.toFixed(1);
+
+            // 更新长方形可视化尺寸（在固定容器内按比例缩放）
+            // 容器可用空间（留出边距，确保长方形不会贴边）
+            const padding = 20; // 容器内边距
+            const containerWidth = 600 - padding * 2;  // 560px
+            const containerHeight = 400 - padding * 2; // 360px
+            
+            // 计算缩放因子，确保长方形完全在容器内
+            // 需要同时满足：scaledWidth <= containerWidth 和 scaledHeight <= containerHeight
+            const scaleFactorX = containerWidth / length;
+            const scaleFactorY = containerHeight / width;
+            // 取较小的缩放因子，确保两个方向都不会超出
+            const scaleFactor = Math.min(scaleFactorX, scaleFactorY);
+            
+            // 计算缩放后的尺寸
+            const scaledWidth = length * scaleFactor;
+            const scaledHeight = width * scaleFactor;
+            
+            // 设置长方形尺寸（已经通过scaleFactor保证不会超出）
+            rectangle.style.width = `${scaledWidth}px`;
+            rectangle.style.height = `${scaledHeight}px`;
+
+            // 更新数值计算公式
+            numericCalculation.innerHTML = `3️⃣ 数值计算：b = ${area} ÷ ${length} = <span class="formula-highlight">${width.toFixed(1)}</span> 厘米`;
+        }
+
+        // 面积滑块事件监听
+        areaSlider.addEventListener('input', function() {
+            const newArea = parseInt(this.value);
+            // 如果面积变化，保持长不变，宽自动计算
+            area = newArea;
+            width = area / length;
+            
+            // 检查宽是否合理（避免过小或过大）
+            if (width < 1) {
+                width = 1;
+                area = length * width;
+                areaSlider.value = area;
+            }
+            
+            updateDisplay();
+        });
+
+        // 长滑块事件监听
+        lengthSlider.addEventListener('input', function() {
+            const newLength = parseInt(this.value);
+            // 如果长变化，保持面积不变，宽自动计算
+            length = newLength;
+            width = area / length;
+            
+            // 检查宽是否合理（避免过小或过大）
+            if (width < 1) {
+                width = 1;
+                area = length * width;
+                areaSlider.value = area;
+            }
+            
+            updateDisplay();
+        });
+
+        // 初始显示更新
+        updateDisplay();
+
+        // 返回主菜单函数
+        function goHome() {
+            if (typeof require !== 'undefined') {
+                const { ipcRenderer } = require('electron');
+                ipcRenderer.send('navigate', 'index.html');
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>

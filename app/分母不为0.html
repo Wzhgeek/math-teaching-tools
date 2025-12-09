@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分式 $\frac{x-1}{x-2}$ 交互探究工具</title>
+    <!-- Ant Design CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/antd@5.12.8/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/antd@5.12.8/dist/antd.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #fff1f0 0%, #ffe7e5 100%);
+            padding: 24px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: #fff;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #ff4d4f;
+            text-align: center;
+            margin: 16px 0 32px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .fraction-display {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 32px;
+            color: #ff4d4f;
+            font-weight: 600;
+            background: linear-gradient(135deg, #fff1f0 0%, #ffe7e5 100%);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #ffccc7;
+        }
+
+        /* 滑块样式 */
+        .slider-group {
+            margin-bottom: 32px;
+            width: 100%;
+            background: #fafafa;
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid #f0f0f0;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #262626;
+        }
+
+        .slider-value {
+            color: #ff4d4f;
+            font-weight: 600;
+            font-size: 20px;
+            background: #fff1f0;
+            padding: 4px 12px;
+            border-radius: 6px;
+        }
+
+        .slider {
+            width: 100%;
+            height: 10px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #f0f0f0;
+            border-radius: 5px;
+            outline: none;
+            position: relative;
+            transition: background 0.3s;
+        }
+
+        .slider:hover {
+            background: #d9d9d9;
+        }
+
+        /* 滑块断点标记 */
+        .slider::after {
+            content: '';
+            position: absolute;
+            left: 50%; /* x=2 对应滑块50%位置（滑块范围0-4） */
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background-color: #ff4d4f;
+            z-index: 1;
+            border-radius: 2px;
+        }
+
+        .slider::before {
+            content: '⚠️ x=2（无意义）';
+            position: absolute;
+            left: 50%;
+            top: -30px;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #ff4d4f;
+            font-weight: 600;
+            background: #fff1f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #ff4d4f;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 2;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            background: #ff7875;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(255, 77, 79, 0.4);
+        }
+
+        /* 数值显示区 */
+        .value-display {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 32px;
+            padding: 20px;
+            background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+            border-radius: 12px;
+            border: 1px solid #91d5ff;
+        }
+
+        .value-item {
+            font-size: 16px;
+            color: #262626;
+            font-weight: 500;
+        }
+
+        .value-highlight {
+            color: #1890ff;
+            font-weight: 600;
+            font-size: 20px;
+            background: #fff;
+            padding: 4px 12px;
+            border-radius: 6px;
+            margin-left: 8px;
+        }
+
+        /* 绘图区域 */
+        .canvas-container {
+            width: 100%;
+            height: 450px;
+            margin: 32px 0;
+            position: relative;
+            border: 2px solid #ffccc7;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(255, 77, 79, 0.1);
+        }
+
+        #fraction-canvas {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #fff 0%, #fafafa 100%);
+        }
+
+        /* 断点标注 */
+        .breakpoint-label {
+            position: absolute;
+            left: 50%;
+            top: 16px;
+            transform: translateX(-50%);
+            color: #ff4d4f;
+            font-weight: 600;
+            font-size: 14px;
+            background: linear-gradient(135deg, #fff1f0 0%, #ffe7e5 100%);
+            padding: 8px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(255, 77, 79, 0.2);
+            border: 1px solid #ffccc7;
+            z-index: 10;
+        }
+
+        /* 说明区域 */
+        .explanation-section {
+            margin-top: 32px;
+            padding: 24px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
+            border-radius: 12px;
+            border: 1px solid #bae7ff;
+        }
+
+        .explanation-title {
+            font-size: 20px;
+            color: #1890ff;
+            margin-bottom: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .explanation-title::before {
+            content: '💡';
+            font-size: 24px;
+        }
+
+        .explanation-item {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #262626;
+            line-height: 1.8;
+            padding: 8px 0;
+        }
+
+        .explanation-highlight {
+            color: #ff4d4f;
+            font-weight: 600;
+            background: #fff1f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* 返回按钮 */
+        .back-button {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            height: 36px;
+            padding: 0 16px;
+            background: #ff4d4f;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .back-button:hover {
+            background: #ff7875;
+            transform: translateX(-2px);
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+                margin-top: 50px;
+            }
+
+            .fraction-display {
+                font-size: 24px;
+            }
+
+            .canvas-container {
+                height: 300px;
+            }
+
+            .value-display {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+
+            .slider-group {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="position: relative;">
+        <button class="back-button" onclick="goHome()">
+            <span>←</span> 返回主菜单
+        </button>
+        <h1>📊 分式 $\frac{x-1}{x-2}$ 交互探究工具</h1>
+
+        <!-- 分式展示 -->
+        <div class="fraction-display">
+            $\frac{x-1}{x-2}$
+        </div>
+
+        <!-- x值滑块 -->
+        <div class="slider-group">
+            <div class="slider-label">
+                <span>拖动调节 x 的取值（范围：0 ~ 4）</span>
+                <span class="slider-value" id="x-value">1.5</span>
+            </div>
+            <input type="range" min="0" max="4" step="0.1" value="1.5" class="slider" id="x-slider">
+        </div>
+
+        <!-- 实时数值显示 -->
+        <div class="value-display">
+            <div class="value-item">当前 x 值：<span id="current-x" class="value-highlight">1.5</span></div>
+            <div class="value-item">分式值 y = (x-1)/(x-2)：<span id="current-y" class="value-highlight">-1.0</span></div>
+        </div>
+
+        <!-- 绘图区域 -->
+        <div class="canvas-container">
+            <div class="breakpoint-label">断裂点：x=2（分母为0，分式无意义）</div>
+            <canvas id="fraction-canvas"></canvas>
+        </div>
+
+        <!-- 核心说明 -->
+        <div class="explanation-section">
+            <div class="explanation-title">核心知识点</div>
+            <div class="explanation-item">1. 分式有意义的条件：<span class="explanation-highlight">分母不能为0</span>，因此 $\frac{x-1}{x-2}$ 的定义域是 $x \neq 2$；</div>
+            <div class="explanation-item">2. 断裂点：x=2 时，分式无意义，因此函数曲线在 x=2 处出现“断裂”，分为左（x<2）、右（x>2）两部分；</div>
+            <div class="explanation-item">3. 变化规律：当 x 从左侧趋近于2时，y 趋近于 $+\infty$；当 x 从右侧趋近于2时，y 趋近于 $-\infty$；</div>
+            <div class="explanation-item">4. 特殊值：x=1 时，分子为0，分式值 y=0；x≠2 时，分式值随 x 连续变化。</div>
+        </div>
+    </div>
+
+    <script>
+        // DOM元素获取
+        const xSlider = document.getElementById('x-slider');
+        const xValue = document.getElementById('x-value');
+        const currentX = document.getElementById('current-x');
+        const currentY = document.getElementById('current-y');
+        const canvas = document.getElementById('fraction-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Canvas适配（解决高清屏模糊问题）
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            // 重新绘制
+            drawFractionCurve(parseFloat(xSlider.value));
+        }
+
+        // 初始化Canvas尺寸
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // 坐标系映射：将数学坐标(x,y)转换为Canvas像素坐标
+        function mapToCanvas(x, y) {
+            const canvasRect = canvas.getBoundingClientRect();
+            const canvasW = canvasRect.width;
+            const canvasH = canvasRect.height;
+            
+            // x轴范围：0~4 → 对应Canvas水平方向：50px ~ canvasW-50px
+            const xPixel = 50 + (x / 4) * (canvasW - 100);
+            // y轴范围：-10~10 → 对应Canvas垂直方向：canvasH-50px ~ 50px
+            const yPixel = canvasH - 50 - ((y + 10) / 20) * (canvasH - 100);
+            return { x: xPixel, y: yPixel };
+        }
+
+        // 绘制分式曲线
+        function drawFractionCurve(currentXVal) {
+            const canvasRect = canvas.getBoundingClientRect();
+            const canvasW = canvasRect.width;
+            const canvasH = canvasRect.height;
+
+            // 清空画布
+            ctx.clearRect(0, 0, canvas.width / window.devicePixelRatio, canvas.height / window.devicePixelRatio);
+
+            // 1. 绘制坐标轴
+            ctx.beginPath();
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1.5;
+
+            // X轴（y=0）
+            const xAxisY = mapToCanvas(0, 0).y;
+            ctx.moveTo(50, xAxisY);
+            ctx.lineTo(canvasW - 50, xAxisY);
+            // X轴刻度
+            for (let x = 0; x <= 4; x += 0.5) {
+                const pos = mapToCanvas(x, 0);
+                ctx.moveTo(pos.x, xAxisY - 5);
+                ctx.lineTo(pos.x, xAxisY + 5);
+                if (x % 1 === 0) {
+                    ctx.fillStyle = '#666';
+                    ctx.font = '12px Microsoft YaHei';
+                    ctx.fillText(x.toString(), pos.x - 5, xAxisY + 15);
+                }
+            }
+            ctx.fillText('x', canvasW - 60, xAxisY - 10);
+
+            // Y轴（x=2，居中）
+            const yAxisX = mapToCanvas(2, 0).x;
+            ctx.moveTo(yAxisX, 50);
+            ctx.lineTo(yAxisX, canvasH - 50);
+            // Y轴刻度
+            for (let y = -10; y <= 10; y += 2) {
+                const pos = mapToCanvas(2, y);
+                ctx.moveTo(yAxisX - 5, pos.y);
+                ctx.lineTo(yAxisX + 5, pos.y);
+                if (y % 2 === 0) {
+                    ctx.fillStyle = '#666';
+                    ctx.font = '12px Microsoft YaHei';
+                    ctx.fillText(y.toString(), yAxisX + 10, pos.y + 4);
+                }
+            }
+            ctx.fillText('y', yAxisX - 20, 60);
+            ctx.stroke();
+
+            // 2. 绘制断裂点（x=2的垂直虚线）
+            ctx.beginPath();
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]); // 虚线
+            ctx.moveTo(mapToCanvas(2, -10).x, mapToCanvas(2, -10).y);
+            ctx.lineTo(mapToCanvas(2, 10).x, mapToCanvas(2, 10).y);
+            ctx.stroke();
+            ctx.setLineDash([]); // 恢复实线
+
+            // 3. 绘制分式曲线（分x<2和x>2两部分，避开x=2）
+            ctx.beginPath();
+            ctx.strokeStyle = '#3498db';
+            ctx.lineWidth = 2;
+
+            // 左半部分：x从0到1.99
+            for (let x = 0; x <= 1.99; x += 0.01) {
+                const y = (x - 1) / (x - 2);
+                // 限制y范围，避免超出画布
+                if (y > 10) continue;
+                if (y < -10) continue;
+                const pos = mapToCanvas(x, y);
+                x === 0 ? ctx.moveTo(pos.x, pos.y) : ctx.lineTo(pos.x, pos.y);
+            }
+            ctx.stroke();
+
+            // 右半部分：x从2.01到4
+            ctx.beginPath();
+            for (let x = 2.01; x <= 4; x += 0.01) {
+                const y = (x - 1) / (x - 2);
+                if (y > 10) continue;
+                if (y < -10) continue;
+                const pos = mapToCanvas(x, y);
+                x === 2.01 ? ctx.moveTo(pos.x, pos.y) : ctx.lineTo(pos.x, pos.y);
+            }
+            ctx.stroke();
+
+            // 4. 绘制当前选中的点
+            if (currentXVal !== 2) {
+                const y = (currentXVal - 1) / (currentXVal - 2);
+                if (y <= 10 && y >= -10) {
+                    const pos = mapToCanvas(currentXVal, y);
+                    ctx.beginPath();
+                    ctx.fillStyle = '#e74c3c';
+                    ctx.arc(pos.x, pos.y, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        // 更新数值显示
+        function updateValues(x) {
+            xValue.textContent = x.toFixed(1);
+            currentX.textContent = x.toFixed(1);
+            
+            // 计算分式值（处理x=2的特殊情况）
+            if (Math.abs(x - 2) < 0.01) {
+                currentY.textContent = '无意义';
+                currentY.style.color = '#e74c3c';
+            } else {
+                const y = (x - 1) / (x - 2);
+                currentY.textContent = y.toFixed(1);
+                currentY.style.color = '#e74c3c';
+            }
+
+            // 重新绘制曲线
+            drawFractionCurve(x);
+        }
+
+        // 滑块事件监听
+        xSlider.addEventListener('input', function() {
+            const x = parseFloat(this.value);
+            updateValues(x);
+        });
+
+        // 初始化
+        updateValues(parseFloat(xSlider.value));
+
+        // 返回主菜单函数
+        function goHome() {
+            if (typeof require !== 'undefined') {
+                const { ipcRenderer } = require('electron');
+                ipcRenderer.send('navigate', 'index.html');
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // 加载MathJax渲染数学公式（可选，增强公式显示效果）
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+        (function () {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+            script.async = true;
+            document.head.appendChild(script);
+        })();
+    </script>
+</body>
+</html>

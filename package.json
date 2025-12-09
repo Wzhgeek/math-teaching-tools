@@ -1,0 +1,75 @@
+{
+  "name": "math-teaching-tools",
+  "version": "1.0.0",
+  "description": "数学教学工具集合 - 分式、分数、长方形面积",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build-win": "electron-builder --win --x64",
+    "build-win-portable": "electron-builder --win portable --x64",
+    "build-win-dir": "electron-builder --win dir --x64",
+    "build-win-ia32": "electron-builder --win --ia32",
+    "build-all": "electron-builder --win --mac --linux"
+  },
+  "build": {
+    "appId": "com.math.tools",
+    "productName": "数学教学工具",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "*.html",
+      "*.js",
+      "*.json",
+      "!node_modules/**/*",
+      "!dist/**/*",
+      "!*.md",
+      "!安装说明.txt",
+      "!快速开始.md",
+      "!打包说明.md",
+      "!README.md"
+    ],
+    "asar": true,
+    "asarUnpack": [],
+    "compression": "maximum",
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "icon.ico"
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-便携版.${ext}",
+      "requestExecutionLevel": "user"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "artifactName": "${productName}-${version}-安装版.${ext}"
+    }
+  },
+  "keywords": [
+    "数学",
+    "教学",
+    "工具"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^27.0.0",
+    "electron-builder": "^24.6.4"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/cli": "^8.0.0",
+    "@capacitor/core": "^8.0.0"
+  }
+}

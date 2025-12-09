@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数学教学工具 - 主菜单</title>
+    <!-- Ant Design CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/antd@5.12.8/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/antd@5.12.8/dist/antd.min.css">
+    <!-- Ant Design Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ant-design/icons@5.2.6/lib/index.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        .main-container {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            padding: 48px;
+            max-width: 1000px;
+            width: 100%;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            font-weight: 600;
+            color: #1890ff;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .subtitle {
+            font-size: 18px;
+            color: #8c8c8c;
+            margin-top: 8px;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .tool-card {
+            background: #fff;
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            padding: 32px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.15);
+            border-color: #1890ff;
+        }
+
+        .tool-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .tool-card:nth-child(1) {
+            border-top-color: #ff4d4f;
+        }
+
+        .tool-card:nth-child(1):hover {
+            border-color: #ff4d4f;
+            box-shadow: 0 12px 24px rgba(255, 77, 79, 0.15);
+        }
+
+        .tool-card:nth-child(1)::before {
+            background: linear-gradient(90deg, #ff4d4f 0%, #ff7875 100%);
+        }
+
+        .tool-card:nth-child(2) {
+            border-top-color: #52c41a;
+        }
+
+        .tool-card:nth-child(2):hover {
+            border-color: #52c41a;
+            box-shadow: 0 12px 24px rgba(82, 196, 26, 0.15);
+        }
+
+        .tool-card:nth-child(2)::before {
+            background: linear-gradient(90deg, #52c41a 0%, #73d13d 100%);
+        }
+
+        .tool-card:nth-child(3) {
+            border-top-color: #1890ff;
+        }
+
+        .tool-card:nth-child(3):hover {
+            border-color: #1890ff;
+            box-shadow: 0 12px 24px rgba(24, 144, 255, 0.15);
+        }
+
+        .tool-card:nth-child(3)::before {
+            background: linear-gradient(90deg, #1890ff 0%, #40a9ff 100%);
+        }
+
+        .tool-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            display: block;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .tool-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #262626;
+            margin-bottom: 12px;
+        }
+
+        .tool-desc {
+            font-size: 14px;
+            color: #8c8c8d;
+            line-height: 1.6;
+        }
+
+        .ant-btn {
+            height: 40px;
+            font-size: 16px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 24px;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .tools-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .tool-card {
+                padding: 24px 20px;
+            }
+
+            .tool-icon {
+                font-size: 48px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <h1>🎓 数学教学工具</h1>
+            <p class="subtitle">选择你想要学习的工具，开始探索数学的奥秘吧！</p>
+        </div>
+        
+        <div class="tools-grid">
+            <div class="tool-card" onclick="loadTool('分母不为0.html')">
+                <span class="tool-icon">📊</span>
+                <div class="tool-title">分式交互探究工具</div>
+                <div class="tool-desc">探索分式 (x-1)/(x-2) 的特性<br>理解分母不为0的重要性</div>
+            </div>
+
+            <div class="tool-card" onclick="loadTool('小游戏.html')">
+                <span class="tool-icon">🎮</span>
+                <div class="tool-title">分数与分式分类游戏</div>
+                <div class="tool-desc">学习分数与分式的区别<br>通过游戏加深理解</div>
+            </div>
+
+            <div class="tool-card" onclick="loadTool('长方形.html')">
+                <span class="tool-icon">📐</span>
+                <div class="tool-title">长方形面积模型</div>
+                <div class="tool-desc">交互式探索长方形面积<br>与长宽的关系</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 在Electron环境中导航
+        function loadTool(filename) {
+            // 添加点击反馈
+            event.currentTarget.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                event.currentTarget.style.transform = '';
+            }, 150);
+
+            if (typeof require !== 'undefined') {
+                // Electron环境
+                const { ipcRenderer } = require('electron');
+                ipcRenderer.send('navigate', filename);
+            } else {
+                // 浏览器环境（开发测试）
+                window.location.href = filename;
+            }
+        }
+    </script>
+</body>
+</html>

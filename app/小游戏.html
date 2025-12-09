@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分数与分式 概念对比+智能分类游戏</title>
+    <!-- Ant Design CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/antd@5.12.8/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/antd@5.12.8/dist/antd.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            padding: 24px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: #fff;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #52c41a;
+            text-align: center;
+            margin: 16px 0 32px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        h2 {
+            color: #52c41a;
+            margin-bottom: 24px;
+            font-size: 22px;
+            font-weight: 600;
+            border-left: 4px solid #52c41a;
+            padding-left: 16px;
+            background: linear-gradient(135deg, #f6ffed 0%, #f0f9ff 100%);
+            padding: 12px 16px;
+            border-radius: 8px;
+        }
+
+        /* 维恩图样式 */
+        .venn-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 2rem 0;
+            position: relative;
+            height: 300px;
+        }
+
+        .venn-circle {
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+            position: absolute;
+            transition: transform 0.3s;
+        }
+
+        .venn-circle:hover {
+            transform: scale(1.05);
+        }
+
+        .circle-fraction {
+            background: linear-gradient(135deg, rgba(24, 144, 255, 0.15) 0%, rgba(24, 144, 255, 0.25) 100%);
+            border: 3px solid #1890ff;
+            left: calc(50% - 200px);
+            box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+        }
+
+        .circle-algebraic {
+            background: linear-gradient(135deg, rgba(255, 77, 79, 0.15) 0%, rgba(255, 77, 79, 0.25) 100%);
+            border: 3px solid #ff4d4f;
+            right: calc(50% - 200px);
+            box-shadow: 0 4px 12px rgba(255, 77, 79, 0.2);
+        }
+
+        .venn-overlap {
+            position: absolute;
+            width: 120px;
+            text-align: center;
+            z-index: 10;
+            background: linear-gradient(135deg, #fff 0%, #fafafa 100%);
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: 2px solid #52c41a;
+        }
+
+        .venn-title {
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: #262626;
+        }
+
+        .venn-item {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #595959;
+            line-height: 1.6;
+        }
+
+        .highlight-key {
+            color: #ff4d4f;
+            font-weight: 600;
+            background: #fff1f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* 对比表格样式 */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 32px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            border: 1px solid #f0f0f0;
+            padding: 16px;
+            text-align: left;
+            font-size: 15px;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
+        .comparison-table tr:hover {
+            background-color: #f0f9ff;
+        }
+
+        /* 返回按钮 */
+        .back-button {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            height: 36px;
+            padding: 0 16px;
+            background: #52c41a;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .back-button:hover {
+            background: #73d13d;
+            transform: translateX(-2px);
+        }
+
+        /* 分类游戏样式 */
+        .game-container {
+            padding: 24px;
+            background: linear-gradient(135deg, #f6ffed 0%, #f0f9ff 100%);
+            border-radius: 12px;
+            margin-top: 24px;
+            border: 1px solid #b7eb8f;
+        }
+
+        .game-input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .game-input {
+            flex: 1;
+            min-width: 250px;
+            height: 40px;
+            padding: 0 16px;
+            border: 2px solid #d9d9d9;
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .game-input:focus {
+            border-color: #52c41a;
+            box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
+        }
+
+        .game-btn {
+            height: 40px;
+            padding: 0 24px;
+            background: #52c41a;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .game-btn:hover {
+            background: #73d13d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3);
+        }
+
+        .preset-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .preset-btn {
+            height: 36px;
+            padding: 0 16px;
+            background: #fff;
+            border: 2px solid #d9d9d9;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .preset-btn:hover {
+            background: #f6ffed;
+            border-color: #52c41a;
+            color: #52c41a;
+            transform: translateY(-2px);
+        }
+
+        .result-display {
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            line-height: 1.8;
+            min-height: 60px;
+            font-weight: 500;
+        }
+
+        .result-correct {
+            background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
+            border: 2px solid #52c41a;
+            color: #389e0d;
+        }
+
+        .result-incorrect {
+            background: linear-gradient(135deg, #fff1f0 0%, #ffccc7 100%);
+            border: 2px solid #ff4d4f;
+            color: #cf1322;
+        }
+
+        .result-neutral {
+            background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+            border: 2px solid #1890ff;
+            color: #0958d9;
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+                margin-top: 50px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+
+            .venn-circle {
+                width: 180px;
+                height: 180px;
+                font-size: 12px;
+            }
+
+            .venn-container {
+                height: 260px;
+            }
+
+            .comparison-table th,
+            .comparison-table td {
+                padding: 12px;
+                font-size: 13px;
+            }
+
+            .game-container {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="position: relative;">
+        <button class="back-button" onclick="goHome()">
+            <span>←</span> 返回主菜单
+        </button>
+        <!-- 概念对比区 -->
+        <h1>🎮 分数与分式 概念对比 & 智能分类游戏</h1>
+
+        <h2>一、分数与分式 维恩图对比</h2>
+        <div class="venn-container">
+            <!-- 分数圆 -->
+            <div class="venn-circle circle-fraction">
+                <div class="venn-title">分数</div>
+                <div class="venn-item">定义：两个整数相除</div>
+                <div class="venn-item">分母：<span class="highlight-key">仅含数字</span></div>
+                <div class="venn-item">例子：3/4、5/8、1/2</div>
+                <div class="venn-item">范畴：有理数</div>
+            </div>
+
+            <!-- 分式圆 -->
+            <div class="venn-circle circle-algebraic">
+                <div class="venn-title">分式</div>
+                <div class="venn-item">定义：整式A÷整式B</div>
+                <div class="venn-item">分母：<span class="highlight-key">含字母</span></div>
+                <div class="venn-item">例子：1/x、(a+1)/b</div>
+                <div class="venn-item">范畴：代数式</div>
+            </div>
+
+            <!-- 交集 -->
+            <div class="venn-overlap">
+                <div class="venn-item">共同点</div>
+                <div class="venn-item">① 形式：A/B（B≠0）</div>
+                <div class="venn-item">② 分母不为0</div>
+            </div>
+        </div>
+
+        <h2>二、分数与分式 详细对比表格</h2>
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>对比维度</th>
+                    <th>分数</th>
+                    <th>分式</th>
+                    <th>核心区别</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>定义</td>
+                    <td>把单位“1”平均分成若干份，表示这样的一份或几份的数</td>
+                    <td>形如 A/B（A、B是整式，B中含有字母且B≠0）的式子</td>
+                    <td rowspan="4">
+                        <span class="highlight-key">分母是否含有字母</span>：<br>
+                        分数分母仅为数字，<br>
+                        分式分母必须含字母
+                    </td>
+                </tr>
+                <tr>
+                    <td>分母特征</td>
+                    <td>分母是不为0的整数</td>
+                    <td>分母是含字母的整式（且≠0）</td>
+                </tr>
+                <tr>
+                    <td>取值性质</td>
+                    <td>值为固定有理数</td>
+                    <td>值随字母取值变化</td>
+                </tr>
+                <tr>
+                    <td>典型例子</td>
+                    <td>5/6、7/9、10/3</td>
+                    <td>2/x、(m-3)/n、(x²+1)/y</td>
+                </tr>
+                <tr>
+                    <td>所属范畴</td>
+                    <td>数（有理数）</td>
+                    <td>代数式（有理式）</td>
+                    <td>分数是“数”，分式是“式”</td>
+                </tr>
+                <tr>
+                    <td>限制条件</td>
+                    <td>分母≠0（天然满足）</td>
+                    <td>分母≠0（需额外限制字母取值）</td>
+                    <td>分式需考虑字母取值范围</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- 智能分类游戏区 -->
+        <h2>三、分式智能分类游戏</h2>
+        <div class="game-container">
+            <div class="game-desc" style="margin-bottom: 1.5rem; color: #34495e; font-size: 1rem;">
+                输入或选择一个代数式，系统将判断是否为分式，并给出详细理由（提示：π是常数，不是字母）
+            </div>
+
+            <!-- 预设选项 -->
+            <div class="preset-options">
+                <button class="preset-btn" data-value="3/4">3/4</button>
+                <button class="preset-btn" data-value="5/x">5/x</button>
+                <button class="preset-btn" data-value="(a+2)/3">(a+2)/3</button>
+                <button class="preset-btn" data-value="7/(y-1)">7/(y-1)</button>
+                <button class="preset-btn" data-value="π/2">π/2</button>
+                <button class="preset-btn" data-value="(x²+1)/z">(x²+1)/z</button>
+            </div>
+
+            <!-- 输入框 + 提交按钮 -->
+            <div class="game-input-group">
+                <input type="text" class="game-input" id="algebra-input" placeholder="请输入代数式（如：1/x、(a+1)/b）">
+                <button class="game-btn" id="judge-btn">判断是否为分式</button>
+            </div>
+
+            <!-- 结果展示 -->
+            <div class="result-display neutral" id="result-display">
+                请输入或选择一个代数式，点击“判断”按钮开始游戏
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM元素获取
+        const algebraInput = document.getElementById('algebra-input');
+        const judgeBtn = document.getElementById('judge-btn');
+        const resultDisplay = document.getElementById('result-display');
+        const presetBtns = document.querySelectorAll('.preset-btn');
+
+        // 预设选项点击事件
+        presetBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                algebraInput.value = btn.dataset.value;
+                // 自动触发判断
+                judgeFraction();
+            });
+        });
+
+        // 提交按钮点击事件
+        judgeBtn.addEventListener('click', judgeFraction);
+
+        // 核心判断逻辑：判断是否为分式
+        function judgeFraction() {
+            const input = algebraInput.value.trim();
+            if (!input) {
+                showResult('请输入有效的代数式！', 'neutral');
+                return;
+            }
+
+            // 清理输入（简化处理，聚焦分母含字母的核心特征）
+            const cleanInput = input.replace(/\s+/g, ''); // 去除空格
+            const result = analyzeAlgebra(cleanInput);
+
+            // 展示结果
+            showResult(result.msg, result.type);
+        }
+
+        // 代数式分析逻辑
+        function analyzeAlgebra(expr) {
+            // 基础规则：
+            // 1. 形如 A/B 的结构
+            // 2. B（分母）中包含字母（排除π）
+            // 3. 字母：a-z（除π）、A-Z
+
+            // 第一步：判断是否有分母（是否包含 / ）
+            if (!expr.includes('/')) {
+                return {
+                    msg: `“${expr}”不是分数/分式结构（无分母），因此不是分式`,
+                    type: 'incorrect'
+                };
+            }
+
+            // 第二步：拆分分子和分母
+            const parts = splitNumeratorDenominator(expr);
+            const numerator = parts.numerator;
+            const denominator = parts.denominator;
+
+            // 第三步：判断分母是否含字母（排除π）
+            const hasLetterInDenominator = /[a-zA-Z]/.test(denominator) && !/^π$/.test(denominator.replace(/\s+/g, ''));
+            
+            if (hasLetterInDenominator) {
+                // 分母含字母 → 分式
+                return {
+                    msg: `“${expr}”是分式！理由：分母为“${denominator}”，其中包含字母（非π常数），符合分式“分母含字母的整式比”定义`,
+                    type: 'correct'
+                };
+            } else {
+                // 分母不含字母 → 不是分式（是分数）
+                return {
+                    msg: `“${expr}”不是分式！理由：分母为“${denominator}”，仅包含数字/π（常数），无字母，属于分数（数）而非分式（代数式）`,
+                    type: 'incorrect'
+                };
+            }
+        }
+
+        // 辅助函数：拆分分子和分母（处理括号场景，如 (a+1)/b、3/(x-2)）
+        function splitNumeratorDenominator(expr) {
+            let numerator = '';
+            let denominator = '';
+            const slashIndex = expr.indexOf('/');
+
+            // 简单场景：无括号或括号在分子/分母内部
+            // 计数括号，确保拆分正确（如 (a+b)/(c+d)）
+            let bracketCount = 0;
+            let splitPos = -1;
+
+            for (let i = 0; i < expr.length; i++) {
+                if (expr[i] === '(') bracketCount++;
+                if (expr[i] === ')') bracketCount--;
+                if (expr[i] === '/' && bracketCount === 0) {
+                    splitPos = i;
+                    break;
+                }
+            }
+
+            if (splitPos !== -1) {
+                numerator = expr.substring(0, splitPos);
+                denominator = expr.substring(splitPos + 1);
+            } else {
+                // 无括号的简单拆分
+                numerator = expr.substring(0, slashIndex);
+                denominator = expr.substring(slashIndex + 1);
+            }
+
+            return {
+                numerator: numerator.trim(),
+                denominator: denominator.trim()
+            };
+        }
+
+        // 结果展示函数
+        function showResult(msg, type) {
+            // 重置样式
+            resultDisplay.className = 'result-display';
+            // 添加对应样式
+            resultDisplay.classList.add(`result-${type}`);
+            // 设置文本
+            resultDisplay.textContent = msg;
+        }
+
+        // 回车触发判断
+        algebraInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                judgeFraction();
+            }
+        });
+
+        // 返回主菜单函数
+        function goHome() {
+            if (typeof require !== 'undefined') {
+                const { ipcRenderer } = require('electron');
+                ipcRenderer.send('navigate', 'index.html');
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>
